@@ -8,67 +8,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; color: #1f2937; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
         
-        /* สไตล์เดิมของ Dashboard */
-        .card { background: #ffffff; border: 1px solid #f3f4f6; }
-        .status-pill { padding: 2px 8px; border-radius: 4px; font-size: 10px; text-transform: uppercase; font-weight: 600; }
-        .status-active { background-color: #f0fdf4; color: #166534; }
-        .status-disabled { background-color: #fef2f2; color: #991b1b; }
-        .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; padding-top: 10px; z-index: 50; }
-        .group:hover .dropdown-menu { display: block; }
-        .group { position: relative; }
-
-        /* --- สไตล์ใหม่สำหรับ Splash Screen (White Minimal) --- */
+        /* --- Splash Screen (White Minimal) --- */
         #splash-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #ffffff; /* พื้นหลังสีขาว */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.8s ease;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #ffffff;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 9999; transition: opacity 0.8s ease;
         }
-
+        .splash-logo { width: 220px; height: auto; margin-bottom: 50px; }
+        .continue-btn {
+            padding: 12px 40px; border: 1px solid #e5e7eb; border-radius: 12px;
+            text-transform: uppercase; font-size: 13px; font-weight: 600; cursor: pointer;
+            transition: all 0.3s;
+        }
+        .continue-btn:hover { background-color: #f9fafb; border-color: #000; }
         #splash-screen.hidden { opacity: 0; visibility: hidden; }
 
-        .splash-logo {
-            width: 280px; /* โลโก้ขนาดใหญ่ขึ้น */
-            height: auto;
-            margin-bottom: 60px;
-        }
-
-        .continue-btn {
-            background-color: transparent;
-            color: #1f2937;
-            padding: 10px 30px;
-            border: 1px solid #e5e7eb; /* ขอบบางๆ สไตล์ Minimal */
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .continue-btn:hover {
-            background-color: #f9fafb;
-            border-color: #1f2937;
-        }
-
-        /* ซ่อนเนื้อหาหลักไว้ก่อน */
-        #main-content { display: none; opacity: 0; transition: opacity 0.8s ease-in; }
+        /* --- Dashboard (Dark Mode) --- */
+        #main-content { display: none; opacity: 0; transition: opacity 0.8s ease-in; min-height: 100vh; }
         #main-content.show { display: block; opacity: 1; }
-        body.no-scroll { overflow: hidden; }
+        .card-dark { background: #121212; border: 1px solid #1f1f1f; color: #ffffff; }
+        .status-pill { padding: 4px 10px; border-radius: 6px; font-size: 10px; text-transform: uppercase; font-weight: 600; }
+        .status-active { background-color: #064e3b; color: #34d399; }
+        .status-disabled { background-color: #7f1d1d; color: #f87171; }
     </style>
 </head>
-<body class="bg-gray-50 no-scroll">
+<body class="bg-gray-950 text-gray-200 overflow-hidden">
 
     <div id="splash-screen">
         <img src="LGDW.png" alt="Logo" class="splash-logo">
@@ -76,70 +43,68 @@
     </div>
 
     <div id="main-content">
-        <nav class="bg-white border-b border-gray-100 py-4 mb-8 sticky top-0 z-50">
+        <nav class="bg-[#0a0a0a] border-b border-[#1f1f1f] py-5 sticky top-0 z-50">
             <div class="max-w-5xl mx-auto px-6 flex items-center justify-between">
-                <img src="LGDW.png" alt="Logo" class="h-8 md:h-10 w-auto object-contain">
-                <div class="flex items-center gap-4 md:gap-8">
-                    <button onclick="renderList(membersData)" class="text-sm font-medium text-gray-600 hover:text-black transition-colors">Home</button>
-                    <div class="group">
-                        <button class="text-sm font-medium text-gray-600 hover:text-black flex items-center gap-1">Group House ▾</button>
-                        <div class="dropdown-menu">
-                            <div class="bg-white border border-gray-100 rounded-xl shadow-xl p-1 w-32" id="houseDropdown"></div>
+                <img src="LGDW.png" class="h-8 w-auto">
+                <div class="flex items-center gap-8">
+                    <button onclick="location.reload()" class="text-sm text-gray-400 hover:text-white transition">Home</button>
+                    <div class="relative group">
+                        <button class="text-sm text-gray-400 hover:text-white">Group House ▾</button>
+                        <div class="hidden group-hover:block absolute right-0 top-full pt-3 z-50">
+                            <div class="bg-[#121212] border border-[#1f1f1f] rounded-xl shadow-2xl p-2 w-36" id="houseDropdown"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </nav>
 
-        <div class="max-w-5xl mx-auto p-4 md:p-12">
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
-                <div class="card p-4 rounded-2xl"><p class="text-[9px] text-gray-400 uppercase font-semibold">Members</p><h2 id="countBadge" class="text-xl font-light mt-1">0</h2></div>
-                <div class="card p-4 rounded-2xl"><p class="text-[9px] text-gray-400 uppercase font-semibold">Lv.4 Guns</p><h2 id="weaponCount" class="text-xl font-light mt-1">0</h2></div>
-                <div class="card p-4 rounded-2xl col-span-2 md:col-span-1"><p class="text-[9px] text-gray-400 uppercase font-semibold">Last Update</p><h2 id="lastUpdated" class="text-xl font-light mt-1 text-gray-600">-</h2></div>
+        <div class="max-w-5xl mx-auto p-6 md:p-12">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
+                <div class="card-dark p-6 rounded-2xl"><p class="text-[10px] text-gray-500 uppercase tracking-widest">Members</p><h2 id="countBadge" class="text-3xl font-light mt-2">0</h2></div>
+                <div class="card-dark p-6 rounded-2xl"><p class="text-[10px] text-gray-500 uppercase tracking-widest">Lv.4 Guns</p><h2 id="weaponCount" class="text-3xl font-light mt-2">0</h2></div>
+                <div class="card-dark p-6 rounded-2xl col-span-2 md:col-span-1"><p class="text-[10px] text-gray-500 uppercase tracking-widest">Last Update</p><h2 id="lastUpdated" class="text-xl font-light mt-2 text-gray-400">-</h2></div>
             </div>
-            <input type="text" id="searchInput" placeholder="Search name..." onkeyup="filterList()" class="w-full mb-6 px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-black">
-            <div class="card rounded-2xl overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead>
-                            <tr class="text-left text-[9px] text-gray-400 uppercase border-b border-gray-50">
-                                <th class="px-4 py-4 cursor-pointer" onclick="sortBy('Slot')">Slot ↕</th>
-                                <th class="px-4 py-4 cursor-pointer" onclick="sortBy('Name')">Name ↕</th>
-                                <th class="px-4 py-4">Phone</th>
-                                <th class="px-4 py-4 text-center cursor-pointer" onclick="sortBy('Status')">Status ↕</th>
-                                <th class="px-4 py-4">Weapons</th>
-                            </tr>
-                        </thead>
-                        <tbody id="memberList" class="divide-y divide-gray-50 text-xs md:text-sm"></tbody>
-                    </table>
-                </div>
+
+            <input type="text" id="searchInput" placeholder="Search by name or slot..." onkeyup="filterList()" class="w-full mb-8 px-6 py-4 bg-[#121212] border border-[#1f1f1f] rounded-xl text-sm outline-none focus:border-white transition">
+
+            <div class="card-dark rounded-2xl overflow-hidden">
+                <table class="min-w-full">
+                    <thead class="border-b border-[#1f1f1f]">
+                        <tr class="text-left text-[10px] text-gray-500 uppercase tracking-widest">
+                            <th class="px-6 py-5 cursor-pointer" onclick="sortBy('Slot')">Slot</th>
+                            <th class="px-6 py-5 cursor-pointer" onclick="sortBy('Name')">Name</th>
+                            <th class="px-6 py-5">Phone</th>
+                            <th class="px-6 py-5 text-center">Status</th>
+                            <th class="px-6 py-5">Weapons</th>
+                        </tr>
+                    </thead>
+                    <tbody id="memberList" class="divide-y divide-[#1f1f1f]"></tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <script>
-        document.getElementById('unlock-btn').addEventListener('click', function() {
-            const splash = document.getElementById('splash-screen');
-            const content = document.getElementById('main-content');
-            splash.classList.add('hidden');
-            document.body.classList.remove('no-scroll');
-            setTimeout(() => { content.classList.add('show'); }, 300);
+        document.getElementById('unlock-btn').addEventListener('click', () => {
+            document.getElementById('splash-screen').classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+            setTimeout(() => document.getElementById('main-content').classList.add('show'), 300);
         });
 
-        // (ฟังก์ชัน init, renderList, และอื่นๆ เหมือนเดิมของคุณ)
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT62Jes0pP_ZpmgsNmVMekEJgj_Y-8jnvyb1j7_SjIhcGfyUzgLxCPxbdO-HuR8H4JX1JfT97x6YFAz/pub?output=csv';
         let membersData = [];
+
         function initMenu() {
             const menu = document.getElementById('houseDropdown');
-            menu.innerHTML = '';
             for (let i = 1; i <= 6; i++) {
                 const btn = document.createElement('button');
-                btn.className = "block w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg";
+                btn.className = "block w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-[#1f1f1f] rounded-lg transition";
                 btn.innerText = "House " + i;
                 btn.onclick = () => filterByHouse(i.toString());
                 menu.appendChild(btn);
             }
         }
+
         async function init() {
             initMenu();
             const response = await fetch(SHEET_URL);
@@ -150,23 +115,28 @@
                 renderList(membersData);
             }});
         }
-        function filterByHouse(houseValue) { renderList(membersData.filter(m => m.HOUSE === houseValue)); }
+
+        function filterByHouse(val) { renderList(membersData.filter(m => m.HOUSE === val)); }
         function filterList() {
             const term = document.getElementById('searchInput').value.toLowerCase();
             renderList(membersData.filter(m => m.Name.toLowerCase().includes(term) || (m.Slot && m.Slot.toString().includes(term))));
         }
-        function sortBy(key) { membersData.sort((a, b) => (a[key] || '').localeCompare(b[key] || '')); renderList(membersData); }
+        function sortBy(key) {
+            membersData.sort((a, b) => (a[key] || '').localeCompare(b[key] || ''));
+            renderList(membersData);
+        }
+
         function renderList(data) {
             const listBody = document.getElementById('memberList');
             document.getElementById('countBadge').innerText = data.length;
             document.getElementById('weaponCount').innerText = data.filter(m => m.Status === 'Active' && m.Revolver && m.Revolver.includes('Lv.4')).length;
             listBody.innerHTML = data.map((m) => `
-                <tr class="hover:bg-gray-50/50">
-                    <td class="px-4 py-4 text-gray-500">#${m.Slot}</td>
-                    <td class="px-4 py-4 font-medium truncate">${m.Name}</td>
-                    <td class="px-4 py-4 text-gray-400">${m.Phone || '-'}</td>
-                    <td class="px-4 py-4 text-center"><span class="status-pill ${m.Status === 'Active' ? 'status-active' : 'status-disabled'}">${m.Status}</span></td>
-                    <td class="px-4 py-4"><div class="flex flex-wrap gap-1">${['Knife', 'Pool cue', 'Revolver', 'Machete'].map(k => m[k] && m[k].trim() !== "" ? `<span class="px-2 py-0.5 bg-gray-50 text-[9px] rounded border border-gray-100">${m[k]}</span>` : '').join('')}</div></td>
+                <tr class="hover:bg-[#1a1a1a] transition">
+                    <td class="px-6 py-4 text-gray-500">#${m.Slot}</td>
+                    <td class="px-6 py-4 font-medium">${m.Name}</td>
+                    <td class="px-6 py-4 text-gray-500">${m.Phone || '-'}</td>
+                    <td class="px-6 py-4 text-center"><span class="status-pill ${m.Status === 'Active' ? 'status-active' : 'status-disabled'}">${m.Status}</span></td>
+                    <td class="px-6 py-4"><div class="flex flex-wrap gap-2">${['Knife', 'Pool cue', 'Revolver', 'Machete'].map(k => m[k] && m[k].trim() !== "" ? `<span class="px-3 py-1 bg-[#1a1a1a] text-[10px] rounded border border-[#262626]">${m[k]}</span>` : '').join('')}</div></td>
                 </tr>
             `).join('');
         }
