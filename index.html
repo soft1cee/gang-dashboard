@@ -19,41 +19,49 @@
         }
     </style>
 </head>
-<body class="p-4 md:p-12 responsive-padding">
+<body class="bg-gray-50">
 
-    <div class="max-w-5xl mx-auto">
-        <div class="mb-8 md:mb-12 flex justify-center">
-            <img src="LGDW.png" alt="Logo" class="h-20 md:h-32 w-auto object-contain transition-all duration-500 hover:scale-105">
+    <nav class="bg-white border-b border-gray-100 py-4 mb-8 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-6 flex items-center justify-between">
+            <img src="LGDW.png" alt="Logo" class="h-8 md:h-10 w-auto object-contain">
+            <div class="flex items-center gap-4 md:gap-8">
+                <button onclick="renderList(membersData)" class="text-sm font-medium text-gray-600 hover:text-black transition-colors">Home</button>
+                <div class="relative group">
+                    <button class="text-sm font-medium text-gray-600 hover:text-black flex items-center gap-1">Group House ▾</button>
+                    <div class="absolute right-0 mt-2 w-32 bg-white border border-gray-100 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                        <div class="p-1">
+                            ${[1,2,3,4,5].map(i => `<button onclick="filterByHouse('House ${i}')" class="block w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">House ${i}</button>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+    </nav>
 
+    <div class="max-w-5xl mx-auto p-4 md:p-12 responsive-padding">
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mb-8">
             <div class="card p-4 md:p-6 rounded-2xl">
                 <p class="text-[9px] text-gray-400 uppercase tracking-widest font-semibold">Members</p>
                 <h2 id="countBadge" class="text-xl md:text-3xl font-light mt-1">0</h2>
             </div>
             <div class="card p-4 md:p-6 rounded-2xl">
-                <p class="text-[9px] text-gray-400 uppercase tracking-widest font-semibold">Lv.4 Guns active</p>
+                <p class="text-[9px] text-gray-400 uppercase tracking-widest font-semibold">Lv.4 Guns</p>
                 <h2 id="weaponCount" class="text-xl md:text-3xl font-light mt-1 text-black">0</h2>
             </div>
             <div class="card p-4 md:p-6 rounded-2xl col-span-2 md:col-span-1 flex flex-col justify-between">
                 <div class="flex justify-between items-start">
                     <p class="text-[9px] text-gray-400 uppercase tracking-widest font-semibold">Last Update</p>
-                    <div class="flex items-center gap-1.5">
-                        <span class="relative flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                        </span>
-                    </div>
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
                 </div>
                 <h2 id="lastUpdated" class="text-xl md:text-3xl font-light mt-1 text-gray-600">-</h2>
             </div>
         </div>
 
-        <div class="flex items-center justify-between mb-6 gap-4">
-            <input type="text" id="searchInput" placeholder="Search name..." 
-                   class="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-black transition-all text-sm"
-                   onkeyup="filterList()">
-        </div>
+        <input type="text" id="searchInput" placeholder="Search name..." onkeyup="filterList()"
+               class="w-full mb-6 px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-black transition-all text-sm">
 
         <div class="card rounded-2xl overflow-hidden">
             <div class="overflow-x-auto">
@@ -67,8 +75,7 @@
                             <th class="px-4 py-4">Weapons</th>
                         </tr>
                     </thead>
-                    <tbody id="memberList" class="divide-y divide-gray-50 text-xs md:text-sm">
-                    </tbody>
+                    <tbody id="memberList" class="divide-y divide-gray-50 text-xs md:text-sm"></tbody>
                 </table>
             </div>
         </div>
@@ -79,15 +86,17 @@
         let membersData = [], sortOrder = 1;
 
         async function init() {
-            try {
-                const response = await fetch(SHEET_URL);
-                const csvData = await response.text();
-                Papa.parse(csvData, { header: true, skipEmptyLines: true, complete: (results) => {
-                    membersData = results.data.filter(m => m.Name && m.Name.trim() !== "");
-                    document.getElementById('lastUpdated').innerText = new Date().toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
-                    renderList(membersData);
-                }});
-            } catch (e) { console.error("Error loading data"); }
+            const response = await fetch(SHEET_URL);
+            const csvData = await response.text();
+            Papa.parse(csvData, { header: true, skipEmptyLines: true, complete: (results) => {
+                membersData = results.data.filter(m => m.Name && m.Name.trim() !== "");
+                document.getElementById('lastUpdated').innerText = new Date().toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
+                renderList(membersData);
+            }});
+        }
+
+        function filterByHouse(houseName) {
+            renderList(membersData.filter(m => m.House === houseName));
         }
 
         function filterList() {
@@ -109,14 +118,7 @@
         function renderList(data) {
             const listBody = document.getElementById('memberList');
             document.getElementById('countBadge').innerText = data.length;
-            
-            // ปรับ logic การนับ: นับเฉพาะ Status เป็น Active และมีปืน Lv.4
-            document.getElementById('weaponCount').innerText = data.filter(m => 
-                m.Status === 'Active' && 
-                m.Revolver && 
-                m.Revolver.includes('ปืน Lv.4')
-            ).length;
-
+            document.getElementById('weaponCount').innerText = data.filter(m => m.Status === 'Active' && m.Revolver && m.Revolver.includes('ปืน Lv.4')).length;
             listBody.innerHTML = data.map((m) => `
                 <tr class="hover:bg-gray-50/50 transition-colors">
                     <td class="px-4 py-4 text-gray-500 font-light">#${m.Slot}</td>
@@ -127,7 +129,6 @@
                 </tr>
             `).join('');
         }
-
         init();
         setInterval(init, 60000);
     </script>
