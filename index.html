@@ -13,8 +13,11 @@
         .status-pill { padding: 2px 8px; border-radius: 4px; font-size: 10px; text-transform: uppercase; font-weight: 600; }
         .status-active { background-color: #f0fdf4; color: #166534; }
         .status-disabled { background-color: #fef2f2; color: #991b1b; }
-        .dropdown-menu { display: none; }
+        
+        /* แก้ไขส่วน Dropdown ให้เชื่อมต่อกับปุ่ม */
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; padding-top: 10px; z-index: 50; }
         .group:hover .dropdown-menu { display: block; }
+        .group { position: relative; }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -24,10 +27,10 @@
             <img src="LGDW.png" alt="Logo" class="h-8 md:h-10 w-auto object-contain">
             <div class="flex items-center gap-4 md:gap-8">
                 <button onclick="renderList(membersData)" class="text-sm font-medium text-gray-600 hover:text-black transition-colors">Home</button>
-                <div class="relative group">
+                <div class="group">
                     <button class="text-sm font-medium text-gray-600 hover:text-black flex items-center gap-1">Group House ▾</button>
-                    <div class="dropdown-menu absolute right-0 mt-2 w-32 bg-white border border-gray-100 rounded-xl shadow-xl z-50">
-                        <div class="p-1" id="houseDropdown"></div>
+                    <div class="dropdown-menu">
+                        <div class="bg-white border border-gray-100 rounded-xl shadow-xl p-1 w-32" id="houseDropdown"></div>
                     </div>
                 </div>
             </div>
@@ -71,7 +74,7 @@
                 const btn = document.createElement('button');
                 btn.className = "block w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg";
                 btn.innerText = "House " + i;
-                btn.onclick = () => filterByHouse(i.toString()); // กรองจากค่าในคอลัมน์ HOUSE
+                btn.onclick = () => filterByHouse(i.toString());
                 menu.appendChild(btn);
             }
         }
