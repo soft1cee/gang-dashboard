@@ -3,127 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gang Member Dashboard</title>
+    <title>Gang Member Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     
     <style>
         body { 
-            font-family: 'Kanit', sans-serif; 
-            background-color: #0b0f1a; 
-            color: #e2e8f0; 
-            margin: 0;
+            font-family: 'Inter', 'Kanit', sans-serif; 
+            background-color: #f9fafb; 
+            color: #111827; 
         }
-        .member-card { 
-            background: linear-gradient(145deg, #1e293b, #0f172a);
-            border: 1px solid rgba(139, 92, 246, 0.2);
-            transition: all 0.3s ease;
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            overflow: hidden;
         }
-        .member-card:hover { 
-            transform: translateY(-8px); 
-            border-color: #8b5cf6;
-            box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.3);
+        .status-pill {
+            padding: 2px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
-        .loading-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: .5; }
+        .status-active { background-color: #ecfdf5; color: #059669; }
+        .status-disabled { background-color: #fef2f2; color: #dc2626; }
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            font-size: 14px;
         }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
-    <div class="max-w-7xl mx-auto">
-        <div class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-white mb-2 tracking-wider">GANG DASHBOARD</h1>
-            <p class="text-purple-400 uppercase tracking-widest text-sm">Real-time Member & Armory Status</p>
-            <div class="h-1 w-20 bg-purple-600 mx-auto mt-4 rounded-full"></div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="md:col-span-2">
-                <input type="text" id="search" onkeyup="filterMembers()" placeholder="🔍 ค้นหาชื่อสมาชิก, อาวุธ หรือเบอร์โทร..." 
-                class="w-full bg-slate-900 border border-slate-700 p-4 rounded-2xl focus:outline-none focus:border-purple-500 text-white shadow-inner">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Gang Members</h1>
+                <p class="text-gray-500 text-sm">จัดการและตรวจสอบสถานะสมาชิกในแก๊ง</p>
             </div>
-            <div class="bg-slate-900 border border-slate-700 p-4 rounded-2xl flex items-center justify-center shadow-lg">
-                <span class="text-slate-400 mr-2">สมาชิกทั้งหมด:</span>
-                <span id="memberCount" class="text-3xl font-bold text-purple-400">0</span>
+            <div class="bg-indigo-50 px-4 py-2 rounded-lg text-indigo-700 font-semibold border border-indigo-100">
+                ทั้งหมด: <span id="memberCount">0</span>
             </div>
         </div>
 
-        <div id="dashboardGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <div class="text-center col-span-full py-20 text-slate-500 loading-pulse">
-                กำลังเชื่อมต่อฐานข้อมูล Google Sheets...
+        <div class="mb-6">
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </span>
+                <input type="text" id="search" onkeyup="filterMembers()" placeholder="ค้นหาชื่อ, เบอร์โทร หรืออาวุธ..." 
+                class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150 ease-in-out">
+            </div>
+        </div>
+
+        <div class="table-container border border-gray-100">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slot</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Status</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Weapons</th>
+                        </tr>
+                    </thead>
+                    <tbody id="memberList" class="bg-white divide-y divide-gray-100">
+                        </tbody>
+                </table>
+            </div>
+            <div id="loadingState" class="text-center py-10 text-gray-400">
+                กำลังโหลดข้อมูล...
             </div>
         </div>
     </div>
 
     <script>
-        // ลิงก์จากหน้า Publish to Web (ต้องเป็น CSV เท่านั้น)
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT62Jes0pP_ZpmgsNmVMekEJgj_Y-8jnvyb1j7_SjIhcGfyUzgLxCPxbdO-HuR8H4JX1JfT97x6YFAz/pub?output=csv';
-
         let membersData = [];
+        const colors = ['#10b981', '#6366f1', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
         async function init() {
             try {
                 const response = await fetch(SHEET_URL);
-                if (!response.ok) throw new Error('ไม่สามารถดึงข้อมูลได้');
                 const csvData = await response.text();
-                
                 Papa.parse(csvData, {
                     header: true,
                     skipEmptyLines: true,
                     complete: function(results) {
                         membersData = results.data;
-                        renderDashboard(membersData);
+                        renderList(membersData);
+                        document.getElementById('loadingState').classList.add('hidden');
                     }
                 });
             } catch (err) {
-                console.error('Error:', err);
-                document.getElementById('dashboardGrid').innerHTML = 
-                    `<div class="text-center col-span-full py-20 text-red-500">ไม่สามารถโหลดข้อมูลได้ กรุณาเช็กการ Publish to Web</div>`;
+                console.error(err);
             }
         }
 
-        function renderDashboard(data) {
-            const grid = document.getElementById('dashboardGrid');
+        function renderList(data) {
+            const listBody = document.getElementById('memberList');
             const countEl = document.getElementById('memberCount');
-
-            // กรองเฉพาะแถวที่มีชื่อ (Name)
             const validMembers = data.filter(m => m.Name && m.Name.trim() !== "");
+            
             countEl.innerText = validMembers.length;
-
-            if (validMembers.length === 0) {
-                grid.innerHTML = '<div class="text-center col-span-full py-20 text-slate-500 text-xl">ไม่พบข้อมูลสมาชิกในระบบ</div>';
-                return;
-            }
-
-            grid.innerHTML = validMembers.map(m => {
-                // เช็กสถานะว่าเป็น Active หรือไม่
+            
+            listBody.innerHTML = validMembers.map((m, index) => {
                 const isActive = m.Status && m.Status.trim().toLowerCase() === 'active';
+                const char = m.Name.charAt(0).toUpperCase();
+                const bgColor = colors[index % colors.length];
                 
+                // จัดการเรื่องอาวุธให้เป็นปุ่มเล็กๆ (Tags)
+                const weaponTags = m.Weapons ? m.Weapons.split(',').map(w => 
+                    `<span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 mr-2 border border-gray-200">${w.trim()}</span>`
+                ).join('') : '<span class="text-gray-300">-</span>';
+
                 return `
-                    <div class="member-card p-6 rounded-2xl shadow-xl">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="text-xs font-mono text-purple-500 bg-purple-500/10 px-2 py-1 rounded">SLOT: ${m.Slot || '--'}</span>
-                            <span class="text-[10px] font-bold uppercase tracking-widest ${isActive ? 'text-green-400' : 'text-red-400'}">
-                                <span class="${isActive ? 'animate-pulse' : ''}">●</span> ${m.Status || 'UNKNOWN'}
-                            </span>
-                        </div>
-                        
-                        <h3 class="text-xl font-semibold text-white mb-1 truncate">${m.Name}</h3>
-                        <p class="text-purple-400 text-sm mb-4 font-light italic">📞 Phone: ${m.Phone || '-'}</p>
-                        
-                        <div class="border-t border-slate-700/50 pt-4">
-                            <p class="text-[10px] text-slate-500 uppercase mb-2 font-bold tracking-widest">อาวุธในครอบครอง</p>
-                            <div class="text-sm text-slate-300 bg-black/30 p-3 rounded-xl border border-slate-700/30 min-h-[50px] flex items-center">
-                                ${m.Weapons ? m.Weapons : 'ไม่มีข้อมูล'}
+                    <tr class="hover:bg-gray-50 transition duration-150">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 font-mono">
+                            #${m.Slot || '--'}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="avatar flex-shrink-0" style="background-color: ${bgColor}">${char}</div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-semibold text-gray-900">${m.Name}</div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${m.Phone || '-'}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="status-pill ${isActive ? 'status-active' : 'status-disabled'}">
+                                <span class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-green-500' : 'bg-red-500'}"></span>
+                                ${isActive ? 'Active' : 'Disabled'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <div class="flex flex-wrap">${weaponTags}</div>
+                        </td>
+                    </tr>
                 `;
             }).join('');
         }
@@ -132,15 +163,14 @@
             const query = document.getElementById('search').value.toLowerCase();
             const filtered = membersData.filter(m => 
                 (m.Name && m.Name.toLowerCase().includes(query)) || 
-                (m.Weapons && m.Weapons.toLowerCase().includes(query)) ||
                 (m.Phone && m.Phone.toLowerCase().includes(query)) ||
+                (m.Weapons && m.Weapons.toLowerCase().includes(query)) ||
                 (m.Slot && m.Slot.toLowerCase().includes(query))
             );
-            renderDashboard(filtered);
+            renderList(filtered);
         }
 
         init();
-        // อัปเดตทุก 30 วินาที
         setInterval(init, 30000);
     </script>
 </body>
