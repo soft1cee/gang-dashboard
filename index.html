@@ -19,76 +19,59 @@
         .group:hover .dropdown-menu { display: block; }
         .group { position: relative; }
 
-        /* --- สไตล์สำหรับ Splash Screen --- */
+        /* --- สไตล์ใหม่สำหรับ Splash Screen (White Minimal) --- */
         #splash-screen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background-color: #111827; /* สีพื้นหลังหน้าล็อค (สีเทาเข้มเกือบดำ) */
+            background-color: #ffffff; /* พื้นหลังสีขาว */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 9999; /* ให้อยู่บนสุดทับทุกอย่าง */
-            transition: opacity 0.6s ease-out, visibility 0.6s;
+            z-index: 9999;
+            transition: opacity 0.8s ease;
         }
 
-        #splash-screen.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
+        #splash-screen.hidden { opacity: 0; visibility: hidden; }
 
         .splash-logo {
-            width: 200px; /* ขนาดโลโก้ในหน้า Splash */
+            width: 280px; /* โลโก้ขนาดใหญ่ขึ้น */
             height: auto;
-            margin-bottom: 40px;
-            animation: pulse 2s infinite; /* ทำให้โลโก้เต้นเบาๆ */
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+            margin-bottom: 60px;
         }
 
         .continue-btn {
-            background-color: #ffffff;
-            color: #111827;
-            padding: 12px 40px;
-            border-radius: 9999px; /* ทำให้ขอบมนเป็นแคปซูล */
-            font-weight: 600;
-            font-size: 1rem;
-            letter-spacing: 1px;
+            background-color: transparent;
+            color: #1f2937;
+            padding: 10px 30px;
+            border: 1px solid #e5e7eb; /* ขอบบางๆ สไตล์ Minimal */
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
-            border: none;
             cursor: pointer;
-            transition: transform 0.2s, background-color 0.2s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
         }
 
-        .continue-btn:hover { background-color: #f3f4f6; transform: translateY(-2px); }
-        .continue-btn:active { transform: translateY(0); }
+        .continue-btn:hover {
+            background-color: #f9fafb;
+            border-color: #1f2937;
+        }
 
         /* ซ่อนเนื้อหาหลักไว้ก่อน */
-        #main-content {
-            display: none;
-            opacity: 0;
-            transition: opacity 0.8s ease-in;
-        }
-
-        #main-content.show {
-            display: block;
-            opacity: 1;
-        }
-        
-        /* ล็อก Scrollbar เมื่ออยู่หน้า Splash */
+        #main-content { display: none; opacity: 0; transition: opacity 0.8s ease-in; }
+        #main-content.show { display: block; opacity: 1; }
         body.no-scroll { overflow: hidden; }
     </style>
 </head>
-<body class="bg-gray-50 no-scroll"> <div id="splash-screen">
-        <img src="LGDW.png" alt="Doowhite Legend Logo" class="splash-logo">
+<body class="bg-gray-50 no-scroll">
+
+    <div id="splash-screen">
+        <img src="LGDW.png" alt="Logo" class="splash-logo">
         <button id="unlock-btn" class="continue-btn">Continue</button>
     </div>
 
@@ -114,9 +97,7 @@
                 <div class="card p-4 rounded-2xl"><p class="text-[9px] text-gray-400 uppercase font-semibold">Lv.4 Guns</p><h2 id="weaponCount" class="text-xl font-light mt-1">0</h2></div>
                 <div class="card p-4 rounded-2xl col-span-2 md:col-span-1"><p class="text-[9px] text-gray-400 uppercase font-semibold">Last Update</p><h2 id="lastUpdated" class="text-xl font-light mt-1 text-gray-600">-</h2></div>
             </div>
-
             <input type="text" id="searchInput" placeholder="Search name..." onkeyup="filterList()" class="w-full mb-6 px-4 py-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-black">
-
             <div class="card rounded-2xl overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full">
@@ -137,27 +118,20 @@
     </div>
 
     <script>
-        // --- ส่วนควบคุม Splash Screen ---
         document.getElementById('unlock-btn').addEventListener('click', function() {
             const splash = document.getElementById('splash-screen');
             const content = document.getElementById('main-content');
-            
-            splash.classList.add('hidden'); // ซ่อนหน้าล็อค
-            document.body.classList.remove('no-scroll'); // ปลดล็อกการเลื่อนหน้าจอ
-            
-            // หน่วงเวลาเล็กน้อยให้หน้าหลักแสดงขึ้นมาแบบ Fade in
-            setTimeout(() => {
-                content.classList.add('show');
-            }, 300);
+            splash.classList.add('hidden');
+            document.body.classList.remove('no-scroll');
+            setTimeout(() => { content.classList.add('show'); }, 300);
         });
 
-        // --- ส่วนข้อมูล Sheets เดิมของคุณ ---
+        // (ฟังก์ชัน init, renderList, และอื่นๆ เหมือนเดิมของคุณ)
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT62Jes0pP_ZpmgsNmVMekEJgj_Y-8jnvyb1j7_SjIhcGfyUzgLxCPxbdO-HuR8H4JX1JfT97x6YFAz/pub?output=csv';
         let membersData = [];
-
         function initMenu() {
             const menu = document.getElementById('houseDropdown');
-            menu.innerHTML = ''; // ป้องกันการสร้างปุ่มซ้ำ
+            menu.innerHTML = '';
             for (let i = 1; i <= 6; i++) {
                 const btn = document.createElement('button');
                 btn.className = "block w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg";
@@ -166,7 +140,6 @@
                 menu.appendChild(btn);
             }
         }
-
         async function init() {
             initMenu();
             const response = await fetch(SHEET_URL);
@@ -177,26 +150,16 @@
                 renderList(membersData);
             }});
         }
-
-        function filterByHouse(houseValue) {
-            renderList(membersData.filter(m => m.HOUSE === houseValue));
-        }
-
+        function filterByHouse(houseValue) { renderList(membersData.filter(m => m.HOUSE === houseValue)); }
         function filterList() {
             const term = document.getElementById('searchInput').value.toLowerCase();
             renderList(membersData.filter(m => m.Name.toLowerCase().includes(term) || (m.Slot && m.Slot.toString().includes(term))));
         }
-
-        function sortBy(key) {
-            membersData.sort((a, b) => (a[key] || '').localeCompare(b[key] || ''));
-            renderList(membersData);
-        }
-
+        function sortBy(key) { membersData.sort((a, b) => (a[key] || '').localeCompare(b[key] || '')); renderList(membersData); }
         function renderList(data) {
             const listBody = document.getElementById('memberList');
             document.getElementById('countBadge').innerText = data.length;
             document.getElementById('weaponCount').innerText = data.filter(m => m.Status === 'Active' && m.Revolver && m.Revolver.includes('Lv.4')).length;
-            
             listBody.innerHTML = data.map((m) => `
                 <tr class="hover:bg-gray-50/50">
                     <td class="px-4 py-4 text-gray-500">#${m.Slot}</td>
