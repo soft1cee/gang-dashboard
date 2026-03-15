@@ -19,6 +19,10 @@
 <body class="p-4 md:p-10">
 
     <div class="max-w-6xl mx-auto">
+        <div class="mb-8 flex justify-center">
+            <img src="image_1c74ff.jpg" alt="Gang Logo" class="h-24 md:h-32 object-contain shadow-sm rounded-lg">
+        </div>
+
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold text-gray-900">Gang Member Dashboard</h1>
             <div id="countBadge" class="bg-indigo-100 text-indigo-700 px-4 py-1 rounded-full text-sm font-semibold">0 สมาชิก</div>
@@ -43,7 +47,6 @@
     </div>
 
     <script>
-        // ใส่ลิงก์ CSV จาก Google Sheets ของคุณที่นี่
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT62Jes0pP_ZpmgsNmVMekEJgj_Y-8jnvyb1j7_SjIhcGfyUzgLxCPxbdO-HuR8H4JX1JfT97x6YFAz/pub?output=csv';
 
         async function init() {
@@ -70,7 +73,6 @@
             countBadge.innerText = `${validData.length} สมาชิก`;
 
             listBody.innerHTML = validData.map((m, index) => {
-                // รวมข้อมูลจากคอลัมน์ Knife, Pool cue, Revolver, Machete
                 const weaponFields = ['Knife', 'Pool cue', 'Revolver', 'Machete'];
                 const weaponTags = weaponFields
                     .map(k => m[k] && m[k].trim() !== "" ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-gray-100 text-gray-700 border mr-1 mb-1">${m[k]}</span>` : '')
