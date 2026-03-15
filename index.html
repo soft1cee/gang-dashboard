@@ -3,65 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gang Dashboard Pro</title>
+    <title>Gang Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
-        .avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; font-size: 14px; }
-        .status-pill { padding: 2px 10px; border-radius: 9999px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
-        .status-active { background-color: #ecfdf5; color: #059669; }
-        .status-disabled { background-color: #fef2f2; color: #dc2626; }
-        th { cursor: pointer; user-select: none; }
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #1f2937; }
+        .card { background: #ffffff; border: 1px solid #f3f4f6; transition: all 0.3s ease; }
+        .card:hover { border-color: #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .status-pill { padding: 4px 12px; border-radius: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+        .status-active { background-color: #f0fdf4; color: #166534; }
+        .status-disabled { background-color: #fef2f2; color: #991b1b; }
+        table { border-collapse: separate; border-spacing: 0; }
+        th { border-bottom: 1px solid #f3f4f6; cursor: pointer; transition: color 0.2s; }
+        th:hover { color: #000; }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="p-6 md:p-12">
 
-    <div class="max-w-6xl mx-auto">
-        <div class="mb-8 flex justify-center"><img src="LGDW.png" alt="Logo" class="h-24 object-contain"></div>
+    <div class="max-w-5xl mx-auto">
+        <div class="mb-12 flex justify-center">
+            <img src="LGDW.png" alt="Logo" class="h-16 opacity-90 hover:opacity-100 transition-opacity">
+        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                <p class="text-xs text-gray-500 uppercase">สมาชิกทั้งหมด</p>
-                <h2 id="countBadge" class="text-xl font-bold">0 สมาชิก</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="card p-6 rounded-2xl">
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Total Members</p>
+                <h2 id="countBadge" class="text-3xl font-light mt-1">0</h2>
             </div>
-            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                <p class="text-xs text-gray-500 uppercase">ปืน Lv.4 ทั้งหมด</p>
-                <h2 id="weaponCount" class="text-xl font-bold text-indigo-600">0 กระบอก</h2>
+            <div class="card p-6 rounded-2xl">
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Lv.4 Revolvers</p>
+                <h2 id="weaponCount" class="text-3xl font-light mt-1 text-black">0</h2>
             </div>
-            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                <p class="text-xs text-gray-500 uppercase">อัปเดตล่าสุด</p>
-                <h2 id="lastUpdated" class="text-xl font-bold text-gray-700">-</h2>
+            <div class="card p-6 rounded-2xl">
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Last Updated</p>
+                <h2 id="lastUpdated" class="text-3xl font-light mt-1 text-gray-600">-</h2>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" onclick="sortBy('Slot')">Slot ↕</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" onclick="sortBy('Name')">Name ↕</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase" onclick="sortBy('Status')">Status ↕</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Weapons</th>
+        <div class="card rounded-2xl overflow-hidden">
+            <table class="min-w-full">
+                <thead>
+                    <tr class="text-left text-[10px] text-gray-400 uppercase tracking-widest">
+                        <th class="px-8 py-4" onclick="sortBy('Slot')">Slot ↕</th>
+                        <th class="px-8 py-4" onclick="sortBy('Name')">Name ↕</th>
+                        <th class="px-8 py-4">Phone</th>
+                        <th class="px-8 py-4 text-center" onclick="sortBy('Status')">Status ↕</th>
+                        <th class="px-8 py-4">Weapons</th>
                     </tr>
                 </thead>
-                <tbody id="memberList" class="divide-y divide-gray-100"></tbody>
+                <tbody id="memberList" class="divide-y divide-gray-50 text-sm">
+                    </tbody>
             </table>
         </div>
     </div>
 
     <script>
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT62Jes0pP_ZpmgsNmVMekEJgj_Y-8jnvyb1j7_SjIhcGfyUzgLxCPxbdO-HuR8H4JX1JfT97x6YFAz/pub?output=csv';
-        let membersData = [];
-        let sortOrder = 1;
+        let membersData = [], sortOrder = 1;
 
         async function init() {
             const response = await fetch(SHEET_URL);
             const csvData = await response.text();
             Papa.parse(csvData, { header: true, skipEmptyLines: true, complete: (results) => {
                 membersData = results.data.filter(m => m.Name && m.Name.trim() !== "");
-                document.getElementById('lastUpdated').innerText = new Date().toLocaleTimeString('th-TH');
+                document.getElementById('lastUpdated').innerText = new Date().toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
                 renderList(membersData);
             }});
         }
@@ -79,30 +85,22 @@
 
         function renderList(data) {
             const listBody = document.getElementById('memberList');
-            document.getElementById('countBadge').innerText = `${data.length} สมาชิก`;
-            
-            // นับเฉพาะ ปืน Lv.4
-            const totalGunLv4 = data.filter(m => m.Revolver && m.Revolver.includes('ปืน Lv.4')).length;
-            document.getElementById('weaponCount').innerText = `${totalGunLv4} กระบอก`;
+            document.getElementById('countBadge').innerText = data.length;
+            document.getElementById('weaponCount').innerText = data.filter(m => m.Revolver && m.Revolver.includes('ปืน Lv.4')).length;
 
-            listBody.innerHTML = data.map((m, index) => {
-                const weaponFields = ['Knife', 'Pool cue', 'Revolver', 'Machete'];
-                const weaponTags = weaponFields.map(k => m[k] && m[k].trim() !== "" ? `<span class="px-2 py-0.5 rounded-md text-[10px] bg-gray-100 border mr-1">${m[k]}</span>` : '').join('');
-                
-                return `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 text-sm font-mono text-gray-900">#${m.Slot}</td>
-                        <td class="px-6 py-4"><span class="text-sm font-semibold">${m.Name}</span></td>
-                        <td class="px-6 py-4 text-sm text-gray-500">${m.Phone || '-'}</td>
-                        <td class="px-6 py-4 text-center"><span class="status-pill ${m.Status === 'Active' ? 'status-active' : 'status-disabled'}">${m.Status}</span></td>
-                        <td class="px-6 py-4 text-sm"><div class="flex flex-wrap">${weaponTags}</div></td>
-                    </tr>
-                `;
-            }).join('');
+            listBody.innerHTML = data.map((m) => `
+                <tr class="hover:bg-gray-50/50 transition-colors">
+                    <td class="px-8 py-5 font-light text-gray-500">#${m.Slot}</td>
+                    <td class="px-8 py-5 font-medium">${m.Name}</td>
+                    <td class="px-8 py-5 text-gray-400">${m.Phone || '-'}</td>
+                    <td class="px-8 py-5 text-center"><span class="status-pill ${m.Status === 'Active' ? 'status-active' : 'status-disabled'}">${m.Status}</span></td>
+                    <td class="px-8 py-5"><div class="flex flex-wrap gap-1">${['Knife', 'Pool cue', 'Revolver', 'Machete'].map(k => m[k] && m[k].trim() !== "" ? `<span class="px-2 py-0.5 bg-gray-50 text-[10px] rounded border border-gray-100">${m[k]}</span>` : '').join('')}</div></td>
+                </tr>
+            `).join('');
         }
 
         init();
-        setInterval(init, 60000); // อัปเดตทุก 1 นาที
+        setInterval(init, 60000);
     </script>
 </body>
 </html>
