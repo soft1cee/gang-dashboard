@@ -13,10 +13,9 @@
         .status-pill { padding: 2px 8px; border-radius: 4px; font-size: 10px; text-transform: uppercase; font-weight: 600; }
         .status-active { background-color: #f0fdf4; color: #166534; }
         .status-disabled { background-color: #fef2f2; color: #991b1b; }
-        @media (max-width: 640px) {
-            .responsive-padding { padding-left: 1rem; padding-right: 1rem; }
-            .text-3xl { font-size: 1.5rem; }
-        }
+        .dropdown-menu { display: none; }
+        .group:hover .dropdown-menu { display: block; }
+        @media (max-width: 640px) { .responsive-padding { padding-left: 1rem; padding-right: 1rem; } .text-3xl { font-size: 1.5rem; } }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -28,10 +27,8 @@
                 <button onclick="renderList(membersData)" class="text-sm font-medium text-gray-600 hover:text-black transition-colors">Home</button>
                 <div class="relative group">
                     <button class="text-sm font-medium text-gray-600 hover:text-black flex items-center gap-1">Group House ▾</button>
-                    <div class="absolute right-0 mt-2 w-32 bg-white border border-gray-100 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                        <div class="p-1">
-                            ${[1,2,3,4,5].map(i => `<button onclick="filterByHouse('House ${i}')" class="block w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">House ${i}</button>`).join('')}
-                        </div>
+                    <div class="dropdown-menu absolute right-0 mt-2 w-40 bg-white border border-gray-100 rounded-xl shadow-xl z-50">
+                        <div class="p-1" id="houseDropdown"></div>
                     </div>
                 </div>
             </div>
@@ -85,7 +82,19 @@
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT62Jes0pP_ZpmgsNmVMekEJgj_Y-8jnvyb1j7_SjIhcGfyUzgLxCPxbdO-HuR8H4JX1JfT97x6YFAz/pub?output=csv';
         let membersData = [], sortOrder = 1;
 
+        function initMenu() {
+            const menu = document.getElementById('houseDropdown');
+            for (let i = 1; i <= 5; i++) {
+                const btn = document.createElement('button');
+                btn.className = "block w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg";
+                btn.innerText = "House " + i;
+                btn.onclick = () => filterByHouse('House ' + i);
+                menu.appendChild(btn);
+            }
+        }
+
         async function init() {
+            initMenu();
             const response = await fetch(SHEET_URL);
             const csvData = await response.text();
             Papa.parse(csvData, { header: true, skipEmptyLines: true, complete: (results) => {
