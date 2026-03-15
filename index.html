@@ -23,7 +23,7 @@
 
     <div class="max-w-5xl mx-auto">
         <div class="mb-12 flex justify-center">
-            <img src="LGDW.png" alt="Logo" class="h-24 md:h-32 w-auto object-contain transition-all duration-500 hover:scale-105">
+            <img src="image_1c74ff.jpg" alt="Logo" class="h-24 md:h-32 w-auto object-contain transition-all duration-500 hover:scale-105">
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
@@ -41,6 +41,20 @@
             </div>
         </div>
 
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <input type="text" id="searchInput" placeholder="ค้นหาสมาชิก..." 
+                   class="w-full md:w-64 px-4 py-2 border border-gray-200 rounded-xl outline-none focus:border-black transition-all"
+                   onkeyup="filterList()">
+            
+            <div class="flex items-center gap-2 text-xs text-gray-400">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                LIVE DATA
+            </div>
+        </div>
+
         <div class="card rounded-2xl overflow-hidden">
             <table class="min-w-full">
                 <thead>
@@ -53,7 +67,7 @@
                     </tr>
                 </thead>
                 <tbody id="memberList" class="divide-y divide-gray-50 text-sm">
-                    </tbody>
+                </tbody>
             </table>
         </div>
     </div>
@@ -70,6 +84,15 @@
                 document.getElementById('lastUpdated').innerText = new Date().toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
                 renderList(membersData);
             }});
+        }
+
+        function filterList() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredData = membersData.filter(m => 
+                m.Name.toLowerCase().includes(searchTerm) || 
+                (m.Slot && m.Slot.toString().includes(searchTerm))
+            );
+            renderList(filteredData);
         }
 
         function sortBy(key) {
