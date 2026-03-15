@@ -25,7 +25,6 @@
             border-color: #8b5cf6;
             box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.3);
         }
-        /* แอนิเมชันตอนโหลดข้อมูล */
         .loading-pulse {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
@@ -46,7 +45,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             <div class="md:col-span-2">
-                <input type="text" id="search" onkeyup="filterMembers()" placeholder="🔍 ค้นหาชื่อสมาชิกหรืออาวุธ..." 
+                <input type="text" id="search" onkeyup="filterMembers()" placeholder="🔍 ค้นหาชื่อสมาชิก, อาวุธ หรือเบอร์โทร..." 
                 class="w-full bg-slate-900 border border-slate-700 p-4 rounded-2xl focus:outline-none focus:border-purple-500 text-white shadow-inner">
             </div>
             <div class="bg-slate-900 border border-slate-700 p-4 rounded-2xl flex items-center justify-center shadow-lg">
@@ -63,16 +62,15 @@
     </div>
 
     <script>
-        // ลิงก์ CSV ที่ถูกต้อง (ต้องลงท้ายด้วย output=csv)
+        // ลิงก์จากหน้า Publish to Web (ต้องเป็น CSV เท่านั้น)
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT62Jes0pP_ZpmgsNmVMekEJgj_Y-8jnvyb1j7_SjIhcGfyUzgLxCPxbdO-HuR8H4JX1JfT97x6YFAz/pub?output=csv';
 
         let membersData = [];
 
-        // เปลี่ยนมาใช้ fetch เพื่อความเสถียรในการดึงข้อมูล
         async function init() {
             try {
-                // ใช้ลิงก์ตรงได้เลยเพราะรันบน GitHub Pages แล้ว
                 const response = await fetch(SHEET_URL);
+                if (!response.ok) throw new Error('ไม่สามารถดึงข้อมูลได้');
                 const csvData = await response.text();
                 
                 Papa.parse(csvData, {
@@ -85,6 +83,8 @@
                 });
             } catch (err) {
                 console.error('Error:', err);
+                document.getElementById('dashboardGrid').innerHTML = 
+                    `<div class="text-center col-span-full py-20 text-red-500">ไม่สามารถโหลดข้อมูลได้ กรุณาเช็กการ Publish to Web</div>`;
             }
         }
 
@@ -92,6 +92,7 @@
             const grid = document.getElementById('dashboardGrid');
             const countEl = document.getElementById('memberCount');
 
+            // กรองเฉพาะแถวที่มีชื่อ (Name)
             const validMembers = data.filter(m => m.Name && m.Name.trim() !== "");
             countEl.innerText = validMembers.length;
 
@@ -101,20 +102,24 @@
             }
 
             grid.innerHTML = validMembers.map(m => {
-                const isOnline = m.Status && m.Status.trim().toLowerCase() === 'on';
+                // เช็กสถานะว่าเป็น Active หรือไม่
+                const isActive = m.Status && m.Status.trim().toLowerCase() === 'active';
+                
                 return `
                     <div class="member-card p-6 rounded-2xl shadow-xl">
                         <div class="flex justify-between items-start mb-4">
-                            <span class="text-xs font-mono text-purple-500 bg-purple-500/10 px-2 py-1 rounded">ID: ${m.ID || '--'}</span>
-                            <span class="text-[10px] font-bold uppercase tracking-widest ${isOnline ? 'text-green-400' : 'text-slate-500'}">
-                                <span class="${isOnline ? 'animate-pulse' : ''}">●</span> ${m.Status || 'OFFLINE'}
+                            <span class="text-xs font-mono text-purple-500 bg-purple-500/10 px-2 py-1 rounded">SLOT: ${m.Slot || '--'}</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest ${isActive ? 'text-green-400' : 'text-red-400'}">
+                                <span class="${isActive ? 'animate-pulse' : ''}">●</span> ${m.Status || 'UNKNOWN'}
                             </span>
                         </div>
+                        
                         <h3 class="text-xl font-semibold text-white mb-1 truncate">${m.Name}</h3>
-                        <p class="text-purple-400 text-sm mb-4 font-light">ตำแหน่ง: ${m.Rank || '-'}</p>
+                        <p class="text-purple-400 text-sm mb-4 font-light italic">📞 Phone: ${m.Phone || '-'}</p>
+                        
                         <div class="border-t border-slate-700/50 pt-4">
                             <p class="text-[10px] text-slate-500 uppercase mb-2 font-bold tracking-widest">อาวุธในครอบครอง</p>
-                            <div class="text-sm text-slate-300 bg-black/30 p-3 rounded-xl border border-slate-700/30 min-h-[50px] flex items-center italic">
+                            <div class="text-sm text-slate-300 bg-black/30 p-3 rounded-xl border border-slate-700/30 min-h-[50px] flex items-center">
                                 ${m.Weapons ? m.Weapons : 'ไม่มีข้อมูล'}
                             </div>
                         </div>
@@ -128,12 +133,14 @@
             const filtered = membersData.filter(m => 
                 (m.Name && m.Name.toLowerCase().includes(query)) || 
                 (m.Weapons && m.Weapons.toLowerCase().includes(query)) ||
-                (m.Rank && m.Rank.toLowerCase().includes(query))
+                (m.Phone && m.Phone.toLowerCase().includes(query)) ||
+                (m.Slot && m.Slot.toLowerCase().includes(query))
             );
             renderDashboard(filtered);
         }
 
         init();
+        // อัปเดตทุก 30 วินาที
         setInterval(init, 30000);
     </script>
 </body>
