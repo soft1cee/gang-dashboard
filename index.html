@@ -109,7 +109,13 @@
         function renderList(data) {
             const listBody = document.getElementById('memberList');
             document.getElementById('countBadge').innerText = data.length;
-            document.getElementById('weaponCount').innerText = data.filter(m => m.Revolver && m.Revolver.includes('ปืน Lv.4')).length;
+            
+            // ปรับ logic การนับ: นับเฉพาะ Status เป็น Active และมีปืน Lv.4
+            document.getElementById('weaponCount').innerText = data.filter(m => 
+                m.Status === 'Active' && 
+                m.Revolver && 
+                m.Revolver.includes('ปืน Lv.4')
+            ).length;
 
             listBody.innerHTML = data.map((m) => `
                 <tr class="hover:bg-gray-50/50 transition-colors">
