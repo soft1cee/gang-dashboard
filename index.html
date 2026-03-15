@@ -43,7 +43,7 @@
     </div>
 
     <script>
-        // ลิงก์จาก Google Sheets (ตรวจสอบให้แน่ใจว่า Publish เป็น CSV แล้ว)
+        // ลิงก์จาก Google Sheets (ต้อง Publish เป็น CSV เท่านั้น)
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT62Jes0pP_ZpmgsNmVMekEJgj_Y-8jnvyb1j7_SjIhcGfyUzgLxCPxbdO-HuR8H4JX1JfT97x6YFAz/pub?output=csv';
 
         async function init() {
@@ -70,13 +70,11 @@
             countBadge.innerText = `${validData.length} สมาชิก`;
 
             listBody.innerHTML = validData.map((m, index) => {
-                // ดึงข้อมูลอาวุธจากทุกคอลัมน์ที่ชื่อตรงกับใน array ด้านล่าง
+                // ดึงค่าอาวุธจากทุกคอลัมน์ที่กำหนดไว้ แล้วรวมเป็น Tag เดียว
                 const weaponFields = ['มีด', 'ไม้', 'ปืน', 'มาเช'];
-                const weapons = weaponFields.map(f => m[f]).filter(v => v && v.trim() !== "");
-                
-                const weaponTags = weapons.map(w => 
-                    `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-gray-100 text-gray-700 mr-1 border">${w}</span>`
-                ).join('');
+                const weaponTags = weaponFields
+                    .map(k => m[k] && m[k].trim() !== "" ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-gray-100 text-gray-700 border mr-1 mb-1">${m[k]}</span>` : '')
+                    .join('');
 
                 return `
                     <tr class="hover:bg-gray-50 transition">
@@ -93,13 +91,16 @@
                                 ${m.Status || '-'}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-sm">${weaponTags || '-'}</td>
+                        <td class="px-6 py-4 text-sm">
+                            <div class="flex flex-wrap">${weaponTags || '-'}</div>
+                        </td>
                     </tr>
                 `;
             }).join('');
         }
 
         init();
+        // อัปเดตข้อมูลอัตโนมัติทุก 30 วินาที
         setInterval(init, 30000);
     </script>
 </body>
