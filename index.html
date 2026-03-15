@@ -70,16 +70,10 @@
 
         // เปลี่ยนมาใช้ fetch เพื่อความเสถียรในการดึงข้อมูล
         async function init() {
-        // ใช้ Proxy เพื่อแก้ปัญหา Failed to fetch (CORS) เมื่อรันบนเครื่องตัวเอง
-        const proxyUrl = 'https://api.allorigins.win/get?url=';
-        const targetUrl = encodeURIComponent(SHEET_URL);
-
             try {
-                const response = await fetch(proxyUrl + targetUrl);
-                if (!response.ok) throw new Error('Network response was not ok');
-                
-                const json = await response.json();
-                const csvData = json.contents; // ดึงข้อมูล CSV ออกจากตัว Proxy
+                // ใช้ลิงก์ตรงได้เลยเพราะรันบน GitHub Pages แล้ว
+                const response = await fetch(SHEET_URL);
+                const csvData = await response.text();
                 
                 Papa.parse(csvData, {
                     header: true,
@@ -90,12 +84,7 @@
                     }
                 });
             } catch (err) {
-                console.error('Fetch error:', err);
-                document.getElementById('dashboardGrid').innerHTML = 
-                    `<div class="text-red-400 text-center col-span-full py-10">
-                        <p class="mb-2">❌ ยังเชื่อมต่อไม่ได้ (CORS Error)</p>
-                        <p class="text-xs text-slate-500">แนะนำให้ลองเปิดผ่าน GitHub Pages หรือ Hosting จริง</p>
-                    </div>`;
+                console.error('Error:', err);
             }
         }
 
