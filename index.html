@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gang Member Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    
+    <style>
+        body { 
+            font-family: 'Kanit', sans-serif; 
+            background-color: #0b0f1a; 
+            color: #e2e8f0; 
+            margin: 0;
+        }
+        .member-card { 
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+        .member-card:hover { 
+            transform: translateY(-8px); 
+            border-color: #8b5cf6;
+            box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.3);
+        }
+        /* แอนิเมชันตอนโหลดข้อมูล */
+        .loading-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-10">
+
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-white mb-2 tracking-wider">GANG DASHBOARD</h1>
+            <p class="text-purple-400 uppercase tracking-widest text-sm">Real-time Member & Armory Status</p>
+            <div class="h-1 w-20 bg-purple-600 mx-auto mt-4 rounded-full"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="md:col-span-2">
+                <input type="text" id="search" onkeyup="filterMembers()" placeholder="🔍 ค้นหาชื่อสมาชิกหรืออาวุธ..." 
+                class="w-full bg-slate-900 border border-slate-700 p-4 rounded-2xl focus:outline-none focus:border-purple-500 text-white shadow-inner">
+            </div>
+            <div class="bg-slate-900 border border-slate-700 p-4 rounded-2xl flex items-center justify-center shadow-lg">
+                <span class="text-slate-400 mr-2">สมาชิกทั้งหมด:</span>
+                <span id="memberCount" class="text-3xl font-bold text-purple-400">0</span>
+            </div>
+        </div>
+
+        <div id="dashboardGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div class="text-center col-span-full py-20 text-slate-500 loading-pulse">
+                กำลังเชื่อมต่อฐานข้อมูล Google Sheets...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ลิงก์ CSV ที่ถูกต้อง (ต้องลงท้ายด้วย output=csv)
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT62Jes0pP_ZpmgsNmVMekEJgj_Y-8jnvyb1j7_SjIhcGfyUzgLxCPxbdO-HuR8H4JX1JfT97x6YFAz/pub?output=csv';
+
+        let membersData = [];
+
+        // เปลี่ยนมาใช้ fetch เพื่อความเสถียรในการดึงข้อมูล
+        async function init() {
+        // ใช้ Proxy เพื่อแก้ปัญหา Failed to fetch (CORS) เมื่อรันบนเครื่องตัวเอง
+        const proxyUrl = 'https://api.allorigins.win/get?url=';
+        const targetUrl = encodeURIComponent(SHEET_URL);
+
+            try {
+                const response = await fetch(proxyUrl + targetUrl);
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const json = await response.json();
+                const csvData = json.contents; // ดึงข้อมูล CSV ออกจากตัว Proxy
+                
+                Papa.parse(csvData, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        membersData = results.data;
+                        renderDashboard(membersData);
+                    }
+                });
+            } catch (err) {
+                console.error('Fetch error:', err);
+                document.getElementById('dashboardGrid').innerHTML = 
+                    `<div class="text-red-400 text-center col-span-full py-10">
+                        <p class="mb-2">❌ ยังเชื่อมต่อไม่ได้ (CORS Error)</p>
+                        <p class="text-xs text-slate-500">แนะนำให้ลองเปิดผ่าน GitHub Pages หรือ Hosting จริง</p>
+                    </div>`;
+            }
+        }
+
+        function renderDashboard(data) {
+            const grid = document.getElementById('dashboardGrid');
+            const countEl = document.getElementById('memberCount');
+
+            const validMembers = data.filter(m => m.Name && m.Name.trim() !== "");
+            countEl.innerText = validMembers.length;
+
+            if (validMembers.length === 0) {
+                grid.innerHTML = '<div class="text-center col-span-full py-20 text-slate-500 text-xl">ไม่พบข้อมูลสมาชิกในระบบ</div>';
+                return;
+            }
+
+            grid.innerHTML = validMembers.map(m => {
+                const isOnline = m.Status && m.Status.trim().toLowerCase() === 'on';
+                return `
+                    <div class="member-card p-6 rounded-2xl shadow-xl">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-xs font-mono text-purple-500 bg-purple-500/10 px-2 py-1 rounded">ID: ${m.ID || '--'}</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest ${isOnline ? 'text-green-400' : 'text-slate-500'}">
+                                <span class="${isOnline ? 'animate-pulse' : ''}">●</span> ${m.Status || 'OFFLINE'}
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-semibold text-white mb-1 truncate">${m.Name}</h3>
+                        <p class="text-purple-400 text-sm mb-4 font-light">ตำแหน่ง: ${m.Rank || '-'}</p>
+                        <div class="border-t border-slate-700/50 pt-4">
+                            <p class="text-[10px] text-slate-500 uppercase mb-2 font-bold tracking-widest">อาวุธในครอบครอง</p>
+                            <div class="text-sm text-slate-300 bg-black/30 p-3 rounded-xl border border-slate-700/30 min-h-[50px] flex items-center italic">
+                                ${m.Weapons ? m.Weapons : 'ไม่มีข้อมูล'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterMembers() {
+            const query = document.getElementById('search').value.toLowerCase();
+            const filtered = membersData.filter(m => 
+                (m.Name && m.Name.toLowerCase().includes(query)) || 
+                (m.Weapons && m.Weapons.toLowerCase().includes(query)) ||
+                (m.Rank && m.Rank.toLowerCase().includes(query))
+            );
+            renderDashboard(filtered);
+        }
+
+        init();
+        setInterval(init, 30000);
+    </script>
+</body>
+</html>
