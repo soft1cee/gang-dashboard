@@ -6,19 +6,22 @@
     <title>Doowhite The Legend</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
         
         /* Splash Screen */
         #splash-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #ffffff;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #ffffff;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             z-index: 9999; transition: opacity 0.6s ease;
         }
-        .splash-logo { width: 220px; margin-bottom: 50px; }
+        .splash-logo { width: 220px; height: auto; margin-bottom: 50px; }
         .continue-btn {
             padding: 12px 40px; border: 1px solid #e5e7eb; border-radius: 12px;
-            text-transform: uppercase; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s;
+            text-transform: uppercase; font-size: 13px; font-weight: 600; cursor: pointer;
+            transition: all 0.3s;
         }
         .continue-btn:hover { background-color: #f9fafb; border-color: #000; }
         #splash-screen.hidden { opacity: 0; visibility: hidden; }
@@ -30,11 +33,6 @@
         .status-pill { padding: 4px 10px; border-radius: 6px; font-size: 10px; text-transform: uppercase; font-weight: 600; }
         .status-active { background-color: #064e3b; color: #34d399; }
         .status-disabled { background-color: #7f1d1d; color: #f87171; }
-        
-        /* Modal Overlay */
-        #addModal { transition: opacity 0.3s; }
-        .input-dark { background: #1a1a1a; border: 1px solid #333; color: white; width: 100%; padding: 10px; border-radius: 8px; outline: none; margin-bottom: 12px;}
-        .input-dark:focus { border-color: #666; }
     </style>
 </head>
 <body class="bg-gray-950 text-gray-200">
@@ -48,10 +46,9 @@
         <nav class="bg-[#0a0a0a] border-b border-[#1f1f1f] py-5 sticky top-0 z-50">
             <div class="max-w-5xl mx-auto px-6 flex items-center justify-between">
                 <img src="LGDW-W.png" class="h-8 w-auto cursor-pointer" onclick="backToSplash()">
-                <div class="flex items-center gap-6">
-                    <button onclick="renderList(membersData); document.getElementById('searchInput').value='';" class="text-sm text-gray-400 hover:text-white">Home</button>
-                    <button onclick="toggleModal(true)" class="bg-white text-black px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition">+ Add Member</button>
-                    <div class="relative group hidden md:block">
+                <div class="flex items-center gap-8">
+                    <button onclick="renderList(membersData); document.getElementById('searchInput').value='';" class="text-sm text-gray-400 hover:text-white transition">Home</button>
+                    <div class="relative group">
                         <button class="text-sm text-gray-400 hover:text-white">Group House ▾</button>
                         <div class="hidden group-hover:block absolute right-0 top-full pt-3 z-50">
                             <div class="bg-[#121212] border border-[#1f1f1f] rounded-xl shadow-2xl p-2 w-36" id="houseDropdown"></div>
@@ -68,64 +65,29 @@
                 <div class="card-dark p-6 rounded-2xl col-span-2 md:col-span-1"><p class="text-[10px] text-gray-500 uppercase tracking-widest">Last Update</p><h2 id="lastUpdated" class="text-xl font-light mt-2 text-gray-400">-</h2></div>
             </div>
 
-            <input type="text" id="searchInput" placeholder="Search by name or slot..." onkeyup="filterList()" class="w-full mb-6 px-6 py-4 bg-[#121212] border border-[#1f1f1f] rounded-xl text-sm outline-none focus:border-white transition">
+            <input type="text" id="searchInput" placeholder="Search by name or slot..." onkeyup="filterList()" class="w-full mb-8 px-6 py-4 bg-[#121212] border border-[#1f1f1f] rounded-xl text-sm outline-none focus:border-white transition">
 
-            <div class="card-dark rounded-2xl overflow-hidden relative">
-                <div id="loadingIndicator" class="absolute inset-0 bg-[#121212] bg-opacity-80 flex justify-center items-center z-10" style="display: none;">
-                    <p class="text-white text-sm">Loading data...</p>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="border-b border-[#1f1f1f]">
-                            <tr class="text-left text-[10px] text-gray-500 uppercase tracking-widest select-none">
-                                <th class="px-6 py-5 cursor-pointer hover:text-white transition" onclick="sortBy('Slot')">Slot ↕</th>
-                                <th class="px-6 py-5 cursor-pointer hover:text-white transition" onclick="sortBy('Name')">Name ↕</th>
-                                <th class="px-6 py-5">Phone</th>
-                                <th class="px-6 py-5 text-center">Status</th>
-                                <th class="px-6 py-5">Weapons</th>
-                                <th class="px-6 py-5 text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="memberList" class="divide-y divide-[#1f1f1f]"></tbody>
-                    </table>
-                </div>
+            <div class="card-dark rounded-2xl overflow-hidden">
+                <table class="min-w-full">
+                    <thead class="border-b border-[#1f1f1f]">
+                        <tr class="text-left text-[10px] text-gray-500 uppercase tracking-widest select-none">
+                            <th class="px-6 py-5 cursor-pointer hover:text-white" onclick="sortBy('Slot')">Slot ↕</th>
+                            <th class="px-6 py-5 cursor-pointer hover:text-white" onclick="sortBy('Name')">Name ↕</th>
+                            <th class="px-6 py-5">Phone</th>
+                            <th class="px-6 py-5 text-center">Status</th>
+                            <th class="px-6 py-5">Weapons</th>
+                        </tr>
+                    </thead>
+                    <tbody id="memberList" class="divide-y divide-[#1f1f1f]"></tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <div id="addModal" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[100] hidden opacity-0">
-        <div class="bg-[#121212] border border-[#1f1f1f] p-8 rounded-2xl w-full max-w-md mx-4">
-            <h2 class="text-xl font-semibold mb-4">Add New Member</h2>
-            <form id="addForm" onsubmit="saveMember(event)">
-                <input type="text" id="mSlot" placeholder="Slot Number" class="input-dark" required>
-                <input type="text" id="mName" placeholder="Name" class="input-dark" required>
-                <input type="text" id="mPhone" placeholder="Phone" class="input-dark">
-                <select id="mStatus" class="input-dark">
-                    <option value="Active">Active</option>
-                    <option value="Disabled">Disabled</option>
-                </select>
-                <div class="flex justify-end gap-3 mt-4">
-                    <button type="button" onclick="toggleModal(false)" class="px-4 py-2 text-sm text-gray-400 hover:text-white transition">Cancel</button>
-                    <button type="submit" id="submitBtn" class="bg-white text-black px-6 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition">Save</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <script>
-        // 🚨 นำ API KEY ของ SheetDB มาใส่ตรงนี้
-        const API_URL = 'https://sheetdb.io/api/v1/YOUR_SHEETDB_API_KEY'; 
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT62Jes0pP_ZpmgsNmVMekEJgj_Y-8jnvyb1j7_SjIhcGfyUzgLxCPxbdO-HuR8H4JX1JfT97x6YFAz/pub?output=csv';
         let membersData = [];
-        let sortDirection = {}; // ตัวแปรสำหรับจำทิศทางการเรียงลำดับ (น้อยไปมาก / มากไปน้อย)
-
-        // --- UI Functions ---
-        document.getElementById('unlock-btn').addEventListener('click', () => {
-            document.getElementById('splash-screen').classList.add('hidden');
-            document.getElementById('main-content').style.display = 'block';
-            setTimeout(() => document.getElementById('main-content').classList.add('show'), 50);
-            fetchData(); // ดึงข้อมูลเมื่อกดเข้าหน้าหลัก
-        });
+        let sortStates = { Slot: 0, Name: 0 }; // 0: none, 1: asc, -1: desc
 
         function backToSplash() {
             document.getElementById('splash-screen').classList.remove('hidden');
@@ -133,16 +95,11 @@
             setTimeout(() => document.getElementById('main-content').style.display = 'none', 600);
         }
 
-        function toggleModal(show) {
-            const modal = document.getElementById('addModal');
-            if(show) {
-                modal.classList.remove('hidden');
-                setTimeout(() => modal.classList.remove('opacity-0'), 10);
-            } else {
-                modal.classList.add('opacity-0');
-                setTimeout(() => modal.classList.add('hidden'), 300);
-            }
-        }
+        document.getElementById('unlock-btn').addEventListener('click', () => {
+            document.getElementById('splash-screen').classList.add('hidden');
+            document.getElementById('main-content').style.display = 'block';
+            setTimeout(() => document.getElementById('main-content').classList.add('show'), 50);
+        });
 
         function initMenu() {
             const menu = document.getElementById('houseDropdown');
@@ -155,69 +112,17 @@
             }
         }
 
-        // --- API Functions (CRUD) ---
-        async function fetchData() {
-            document.getElementById('loadingIndicator').style.display = 'flex';
-            try {
-                const response = await fetch(API_URL);
-                membersData = await response.json();
+        async function init() {
+            initMenu();
+            const response = await fetch(SHEET_URL);
+            const csvData = await response.text();
+            Papa.parse(csvData, { header: true, skipEmptyLines: true, complete: (results) => {
+                membersData = results.data.filter(m => m.Name && m.Name.trim() !== "");
                 document.getElementById('lastUpdated').innerText = new Date().toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
                 renderList(membersData);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                // ข้อมูลจำลองในกรณีที่ API ยังไม่พร้อม
-                membersData = [
-                    { Slot: "1", Name: "Demo User", Phone: "080-123-4567", Status: "Active", Revolver: "Lv.4" }
-                ];
-                renderList(membersData);
-            } finally {
-                document.getElementById('loadingIndicator').style.display = 'none';
-            }
+            }});
         }
 
-        async function saveMember(e) {
-            e.preventDefault(); 
-            const btn = document.getElementById('submitBtn');
-            btn.innerText = "Saving..."; btn.disabled = true;
-
-            const newData = {
-                data: [{
-                    "Slot": document.getElementById('mSlot').value,
-                    "Name": document.getElementById('mName').value,
-                    "Phone": document.getElementById('mPhone').value,
-                    "Status": document.getElementById('mStatus').value
-                }]
-            };
-
-            try {
-                await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newData)
-                });
-                document.getElementById('addForm').reset();
-                toggleModal(false);
-                fetchData(); 
-            } catch (error) {
-                alert("Error saving data. Make sure API key is correct.");
-            } finally {
-                btn.innerText = "Save"; btn.disabled = false;
-            }
-        }
-
-        async function deleteMember(slot) {
-            if(!confirm(`Are you sure you want to delete Slot #${slot}?`)) return;
-            document.getElementById('loadingIndicator').style.display = 'flex';
-            try {
-                await fetch(`${API_URL}/Slot/${slot}`, { method: 'DELETE' });
-                fetchData(); 
-            } catch (error) {
-                alert("Error deleting data.");
-                document.getElementById('loadingIndicator').style.display = 'none';
-            }
-        }
-
-        // --- Data Processing Functions ---
         function filterByHouse(val) { renderList(membersData.filter(m => m.HOUSE === val)); }
         
         function filterList() {
@@ -225,20 +130,21 @@
             renderList(membersData.filter(m => m.Name.toLowerCase().includes(term) || (m.Slot && m.Slot.toString().includes(term))));
         }
 
-        // ฟังก์ชัน Sort ที่แก้ไขบั๊กแล้ว
+        // แก้ไขฟังก์ชันการเรียงลำดับ (Sort)
         function sortBy(key) {
-            sortDirection[key] = sortDirection[key] === 1 ? -1 : 1;
+            // สลับสถานะ: 0 -> 1 -> -1 -> 1 ...
+            sortStates[key] = sortStates[key] === 1 ? -1 : 1;
 
             membersData.sort((a, b) => {
                 let valA = a[key] || '';
                 let valB = b[key] || '';
 
                 if (key === 'Slot') {
-                    let numA = parseInt(valA) || 0;
-                    let numB = parseInt(valB) || 0;
-                    return (numA - numB) * sortDirection[key];
+                    // เรียงแบบตัวเลข
+                    return (parseInt(valA) - parseInt(valB)) * sortStates[key];
                 } else {
-                    return valA.toString().localeCompare(valB.toString()) * sortDirection[key];
+                    // เรียงแบบตัวอักษร
+                    return valA.localeCompare(valB, 'th') * sortStates[key];
                 }
             });
             renderList(membersData);
@@ -247,31 +153,18 @@
         function renderList(data) {
             const listBody = document.getElementById('memberList');
             document.getElementById('countBadge').innerText = data.length;
-            
-            // นับจำนวนปืน Lv.4 เฉพาะคนที่ Active
-            let lv4Count = data.filter(m => m.Status === 'Active' && m.Revolver && m.Revolver.includes('Lv.4')).length;
-            document.getElementById('weaponCount').innerText = lv4Count || 0;
-
+            document.getElementById('weaponCount').innerText = data.filter(m => m.Status === 'Active' && m.Revolver && m.Revolver.includes('Lv.4')).length;
             listBody.innerHTML = data.map((m) => `
                 <tr class="hover:bg-[#1a1a1a] transition">
-                    <td class="px-6 py-4 text-gray-500 whitespace-nowrap">#${m.Slot}</td>
-                    <td class="px-6 py-4 font-medium whitespace-nowrap">${m.Name}</td>
-                    <td class="px-6 py-4 text-gray-500 whitespace-nowrap">${m.Phone || '-'}</td>
-                    <td class="px-6 py-4 text-center whitespace-nowrap"><span class="status-pill ${m.Status === 'Active' ? 'status-active' : 'status-disabled'}">${m.Status}</span></td>
-                    <td class="px-6 py-4">
-                        <div class="flex flex-wrap gap-2">
-                            ${['Knife', 'Pool cue', 'Revolver', 'Machete'].map(k => m[k] && m[k].trim() !== "" ? `<span class="px-3 py-1 bg-[#1a1a1a] text-[10px] rounded border border-[#262626] whitespace-nowrap">${m[k]}</span>` : '').join('')}
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <button onclick="deleteMember('${m.Slot}')" class="text-xs text-red-500 border border-red-500/30 px-3 py-1 rounded hover:bg-red-500 hover:text-white transition">Delete</button>
-                    </td>
+                    <td class="px-6 py-4 text-gray-500">#${m.Slot}</td>
+                    <td class="px-6 py-4 font-medium">${m.Name}</td>
+                    <td class="px-6 py-4 text-gray-500">${m.Phone || '-'}</td>
+                    <td class="px-6 py-4 text-center"><span class="status-pill ${m.Status === 'Active' ? 'status-active' : 'status-disabled'}">${m.Status}</span></td>
+                    <td class="px-6 py-4"><div class="flex flex-wrap gap-2">${['Knife', 'Pool cue', 'Revolver', 'Machete'].map(k => m[k] && m[k].trim() !== "" ? `<span class="px-3 py-1 bg-[#1a1a1a] text-[10px] rounded border border-[#262626]">${m[k]}</span>` : '').join('')}</div></td>
                 </tr>
             `).join('');
         }
-
-        // เริ่มต้นการทำงาน
-        initMenu();
+        init();
     </script>
 </body>
 </html>
